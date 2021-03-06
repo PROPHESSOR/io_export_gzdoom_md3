@@ -562,10 +562,10 @@ class BlenderModelManager:
         # custom normals. If I didn't do this, the vertex normals would be all
         # wrong.
         obj_mesh.calc_normals_split()
-        obj_mesh.calc_tessface()
+        obj_mesh.calc_loop_triangles()
         # See what materials the mesh references, and add new surfaces for
         # those materials if necessary
-        for face_index, face in enumerate(obj_mesh.tessfaces):
+        for face_index, face in enumerate(obj_mesh.loop_triangles):
             # Prefer using the md3shader property of the material. Use the
             # md3shader object property if the material does not have the
             # md3shader property, and use the material name if neither are
@@ -617,11 +617,11 @@ class BlenderModelManager:
             vertex_position = vertex.co
             # Set up vertex reference. If the face is flat-shaded, the face
             # normal is used. Otherwise, the vertex normal is used.
-            normal_ref = "tessfaces"
+            normal_ref = "loop_triangles"
             normal_index = face_index
             normal_subref = None
             normal_subindex = None
-            face = obj_mesh.tessfaces[face_index]
+            face = obj_mesh.loop_triangles[face_index]
             if obj_mesh.has_custom_normals:
                 normal_subref = "split_normals"
                 normal_subindex = face_vertex_index
@@ -641,7 +641,7 @@ class BlenderModelManager:
                 normal_object = getattr(obj_mesh, normal_ref)
                 vertex_normal = normal_object[normal_index].normal
             # Get UV coordinates for this vertex.
-            face_uvs = obj_mesh.tessface_uv_textures.active.data[face_index]
+            face_uvs = obj_mesh.uv_layers.active.data[face_index]
             vertex_uv = face_uvs.uv[face_vertex_index]
             # Get ID from position, normal, and UV.
             vertex_id = BlenderModelManager.encode_vertex(
@@ -710,7 +710,7 @@ class BlenderModelManager:
                 # Set up obj_mesh
                 obj_mesh.transform(self.fix_transform * mesh_obj.matrix_world)
                 obj_mesh.calc_normals_split()
-                obj_mesh.calc_tessface()
+                obj_mesh.calc_loop_triangles()
                 # Set up frame bounds/origin/radius
                 if not nframe_bounds_set:
                     # Copy the vertex so that it isn't modified
