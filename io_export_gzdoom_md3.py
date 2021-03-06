@@ -17,12 +17,13 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 #Updates and additions for Blender 2.6X by Derek McPherson
+#Upgrade to Blender 2.8X by PROPHESSOR
 #
 bl_info = {
         "name": "GZDoom .MD3",
-        "author": "Derek McPherson, Xembie, PhaethonH, Bob Holcomb, Damien McGinnes, Robert (Tr3B) Beckebans, CoDEmanX, Mexicouger, Nash Muhandes, Kevin Caccamo",
+        "author": "Derek McPherson, Xembie, PhaethonH, Bob Holcomb, Damien McGinnes, Robert (Tr3B) Beckebans, CoDEmanX, Mexicouger, Nash Muhandes, Kevin Caccamo, PROPHESSOR",
         "version": (1, 6, 4), # 24th of August 2012 - Mexicouger
-        "blender": (2, 6, 3),
+        "blender": (2, 80, 0),
         "location": "File > Export > GZDoom model (.md3)",
         "description": "Export mesh to GZDoom model with vertex animation (.md3)",
         "warning": "",
@@ -1178,11 +1179,11 @@ def menu_func(self, context):
 
 def register():
     bpy.utils.register_class(ExportMD3)
-    bpy.types.INFO_MT_file_export.append(menu_func)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func)
 
 def unregister():
     bpy.utils.unregister_class(ExportMD3)
-    bpy.types.INFO_MT_file_export.remove(menu_func)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func)
 
 if __name__ == "__main__":
     register()
