@@ -556,7 +556,7 @@ class BlenderModelManager:
             return
         self.mesh_objects.append(mesh_obj)
         bpy.context.scene.frame_set(self.ref_frame)
-        obj_mesh = mesh_obj.to_mesh(bpy.context.scene, True, 'PREVIEW')
+        obj_mesh = mesh_obj.to_mesh()
         obj_mesh.transform(self.fix_transform * mesh_obj.matrix_world)
         # calc_normals_split recalculates normals, even on meshes without
         # custom normals. If I didn't do this, the vertex normals would be all
@@ -706,7 +706,7 @@ class BlenderModelManager:
                 nframe.local_origin = self.mesh_objects[0]
             nframe_bounds_set = False
             for mesh_obj in self.mesh_objects:
-                obj_mesh = mesh_obj.to_mesh(bpy.context.scene, True, "PREVIEW")
+                obj_mesh = mesh_obj.to_mesh()
                 # Set up obj_mesh
                 obj_mesh.transform(self.fix_transform * mesh_obj.matrix_world)
                 obj_mesh.calc_normals_split()
@@ -1122,14 +1122,14 @@ class ExportMD3(bpy.types.Operator):
         col = layout.column()
         col.prop(self, "md3name")
         row = col.row()
-        row.prop(self, "md3logtype", "Log")
+        row.prop(self, "md3logtype", text="Log")
         row.prop(self, "md3dumpall")
         col.prop(self, "md3scale")
-        col.label("Offset:")
+        col.label(text="Offset:")
         row = col.row()
-        row.prop(self, "md3offsetx", "X")
-        row.prop(self, "md3offsety", "Y")
-        row.prop(self, "md3offsetz", "Z")
+        row.prop(self, "md3offsetx", text="X")
+        row.prop(self, "md3offsety", text="Y")
+        row.prop(self, "md3offsetz", text="Z")
         col.prop(self, "md3refframe")
         col.prop(self, "md3forgzdoom")
         col.prop(self, "md3genactordef")
