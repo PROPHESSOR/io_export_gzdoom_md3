@@ -17,12 +17,13 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 #Updates and additions for Blender 2.6X by Derek McPherson
+#Upgrade to Blender 2.8X by PROPHESSOR
 #
 bl_info = {
         "name": "GZDoom .MD3",
-        "author": "Derek McPherson, Xembie, PhaethonH, Bob Holcomb, Damien McGinnes, Robert (Tr3B) Beckebans, CoDEmanX, Mexicouger, Nash Muhandes, Kevin Caccamo",
+        "author": "Derek McPherson, Xembie, PhaethonH, Bob Holcomb, Damien McGinnes, Robert (Tr3B) Beckebans, CoDEmanX, Mexicouger, Nash Muhandes, Kevin Caccamo, PROPHESSOR",
         "version": (1, 6, 4), # 24th of August 2012 - Mexicouger
-        "blender": (2, 6, 3),
+        "blender": (2, 80, 0),
         "location": "File > Export > GZDoom model (.md3)",
         "description": "Export mesh to GZDoom model with vertex animation (.md3)",
         "warning": "",
@@ -555,16 +556,16 @@ class BlenderModelManager:
             return
         self.mesh_objects.append(mesh_obj)
         bpy.context.scene.frame_set(self.ref_frame)
-        obj_mesh = mesh_obj.to_mesh(bpy.context.scene, True, 'PREVIEW')
+        obj_mesh = mesh_obj.to_mesh()
         obj_mesh.transform(self.fix_transform * mesh_obj.matrix_world)
         # calc_normals_split recalculates normals, even on meshes without
         # custom normals. If I didn't do this, the vertex normals would be all
         # wrong.
         obj_mesh.calc_normals_split()
-        obj_mesh.calc_tessface()
+        obj_mesh.calc_loop_triangles()
         # See what materials the mesh references, and add new surfaces for
         # those materials if necessary
-        for face_index, face in enumerate(obj_mesh.tessfaces):
+        for face_index, face in enumerate(obj_mesh.loop_triangles):
             # Prefer using the md3shader property of the material. Use the
             # md3shader object property if the material does not have the
             # md3shader property, and use the material name if neither are
@@ -616,11 +617,11 @@ class BlenderModelManager:
             vertex_position = vertex.co
             # Set up vertex reference. If the face is flat-shaded, the face
             # normal is used. Otherwise, the vertex normal is used.
-            normal_ref = "tessfaces"
+            normal_ref = "loop_triangles"
             normal_index = face_index
             normal_subref = None
             normal_subindex = None
-            face = obj_mesh.tessfaces[face_index]
+            face = obj_mesh.loop_triangles[face_index]
             if obj_mesh.has_custom_normals:
                 normal_subref = "split_normals"
                 normal_subindex = face_vertex_index
@@ -640,7 +641,7 @@ class BlenderModelManager:
                 normal_object = getattr(obj_mesh, normal_ref)
                 vertex_normal = normal_object[normal_index].normal
             # Get UV coordinates for this vertex.
-            face_uvs = obj_mesh.tessface_uv_textures.active.data[face_index]
+            face_uvs = obj_mesh.uv_layers.active.data[face_index]
             vertex_uv = face_uvs.uv[face_vertex_index]
             # Get ID from position, normal, and UV.
             vertex_id = BlenderModelManager.encode_vertex(
@@ -705,11 +706,11 @@ class BlenderModelManager:
                 nframe.local_origin = self.mesh_objects[0]
             nframe_bounds_set = False
             for mesh_obj in self.mesh_objects:
-                obj_mesh = mesh_obj.to_mesh(bpy.context.scene, True, "PREVIEW")
+                obj_mesh = mesh_obj.to_mesh()
                 # Set up obj_mesh
                 obj_mesh.transform(self.fix_transform * mesh_obj.matrix_world)
                 obj_mesh.calc_normals_split()
-                obj_mesh.calc_tessface()
+                obj_mesh.calc_loop_triangles()
                 # Set up frame bounds/origin/radius
                 if not nframe_bounds_set:
                     # Copy the vertex so that it isn't modified
@@ -1121,14 +1122,14 @@ class ExportMD3(bpy.types.Operator):
         col = layout.column()
         col.prop(self, "md3name")
         row = col.row()
-        row.prop(self, "md3logtype", "Log")
+        row.prop(self, "md3logtype", text="Log")
         row.prop(self, "md3dumpall")
         col.prop(self, "md3scale")
-        col.label("Offset:")
+        col.label(text="Offset:")
         row = col.row()
-        row.prop(self, "md3offsetx", "X")
-        row.prop(self, "md3offsety", "Y")
-        row.prop(self, "md3offsetz", "Z")
+        row.prop(self, "md3offsetx", text="X")
+        row.prop(self, "md3offsety", text="Y")
+        row.prop(self, "md3offsetz", text="Z")
         col.prop(self, "md3refframe")
         col.prop(self, "md3forgzdoom")
         col.prop(self, "md3genactordef")
@@ -1178,11 +1179,11 @@ def menu_func(self, context):
 
 def register():
     bpy.utils.register_class(ExportMD3)
-    bpy.types.INFO_MT_file_export.append(menu_func)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func)
 
 def unregister():
     bpy.utils.unregister_class(ExportMD3)
-    bpy.types.INFO_MT_file_export.remove(menu_func)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func)
 
 if __name__ == "__main__":
     register()
